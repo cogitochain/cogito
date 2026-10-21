@@ -43,3 +43,7 @@ def pack(w1, w2):
     flat = [int(w) for r in w1 for w in r] + [int(w) for r in w2 for w in r]
     assert all(-128 <= w <= 127 for w in flat)
     return MAGIC + bytes(w & 0xff for w in flat)
+
+
+def sha256_hex(blob):
+    return hashlib.sha256(blob).hexdigest()
