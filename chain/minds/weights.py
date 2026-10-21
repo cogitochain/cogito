@@ -30,3 +30,8 @@ def validate(blob):
     w1 = [[_i8(w1b[j * IN + i]) for i in range(IN)] for j in range(HIDDEN)]
     w2 = [[_i8(w2b[k * HIDDEN + j]) for j in range(HIDDEN)] for k in range(OUT)]
     return w1, w2
+
+
+def load_weights(path):
+    with open(path, "rb") as f:
+        return validate(f.read())
