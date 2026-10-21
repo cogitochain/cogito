@@ -4,3 +4,29 @@ import sys
 MAGIC = b"COGMIND1"
 IN, HIDDEN, OUT = 256, 128, 16
 SIZE = len(MAGIC) + HIDDEN * IN + OUT * HIDDEN
+
+
+class WeightsError(ValueError):
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
+
+
+def _i8(b):
+    return b - 256 if b > 127 else b
+
+
+def validate(blob):
+    if len(blob) != SIZE:
+        raise WeightsError("BAD_SIZE", "Weights file must be exactly 34,824 bytes (got %d)." % len(blob))
+    if blob[:8] != MAGIC:
+        raise WeightsError("BAD_FORMAT", "Not a COGITO weights file (missing COGMIND1 header).")
+    w1b = blob[8:8 + HIDDEN * IN]
+    w2b = blob[8 + HIDDEN * IN:]
+    if not any(w1b):
+        raise WeightsError("ZERO_WEIGHTS", "W1 is all zeros: this mind would always answer 0.")
+    if not any(w2b):
+        raise WeightsError("ZERO_WEIGHTS", "W2 is all zeros: this mind would always answer 0.")
+    w1 = [[_i8(w1b[j * IN + i]) for i in range(IN)] for j in range(HIDDEN)]
+    w2 = [[_i8(w2b[k * HIDDEN + j]) for j in range(HIDDEN)] for k in range(OUT)]
+    return w1, w2
