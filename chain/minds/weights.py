@@ -35,3 +35,11 @@ def validate(blob):
 def load_weights(path):
     with open(path, "rb") as f:
         return validate(f.read())
+
+
+def pack(w1, w2):
+    assert len(w1) == HIDDEN and all(len(r) == IN for r in w1)
+    assert len(w2) == OUT and all(len(r) == HIDDEN for r in w2)
+    flat = [int(w) for r in w1 for w in r] + [int(w) for r in w2 for w in r]
+    assert all(-128 <= w <= 127 for w in flat)
+    return MAGIC + bytes(w & 0xff for w in flat)
