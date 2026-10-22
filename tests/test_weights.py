@@ -14,6 +14,11 @@ class WeightsRefusals(unittest.TestCase):
     def test_bad_size(self):
         self.assertEqual(self.code(b"COGMIND1" + bytes(10)), "BAD_SIZE")
 
+    def test_bad_magic(self):
+        w1, w2 = weights.random_weights(256, 128, 1)
+        blob = weights.pack(w1, w2)
+        self.assertEqual(self.code(b"NOTMIND!" + blob[8:]), "BAD_FORMAT")
+
 
 class RandomWeights(unittest.TestCase):
     def test_deterministic_and_bounded(self):
