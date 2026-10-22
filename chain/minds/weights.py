@@ -47,3 +47,14 @@ def pack(w1, w2):
 
 def sha256_hex(blob):
     return hashlib.sha256(blob).hexdigest()
+
+
+def random_weights(n_in, hidden, seed):
+    s = seed
+    def nxt():
+        nonlocal s
+        s = (s * 6364136223846793005 + 1442695040888963407) & (2**64 - 1)
+        return (s >> 33) & 0xff
+    w1 = [[(nxt() % 31) - 15 for _ in range(n_in)] for _ in range(hidden)]
+    w2 = [[(nxt() % 31) - 15 for _ in range(hidden)] for _ in range(OUT)]
+    return w1, w2
