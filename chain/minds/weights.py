@@ -58,3 +58,12 @@ def random_weights(n_in, hidden, seed):
     w1 = [[(nxt() % 31) - 15 for _ in range(n_in)] for _ in range(hidden)]
     w2 = [[(nxt() % 31) - 15 for _ in range(hidden)] for _ in range(OUT)]
     return w1, w2
+
+
+if __name__ == "__main__":
+    try:
+        w1, w2 = load_weights(sys.argv[1])
+    except WeightsError as e:
+        print("weights verdict=REFUSED code=%s reason=%s" % (e.code, e))
+        sys.exit(1)
+    print("weights verdict=OK sha256=%s" % sha256_hex(open(sys.argv[1], "rb").read()))
