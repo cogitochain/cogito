@@ -29,6 +29,12 @@ class WeightsRefusals(unittest.TestCase):
         blob = weights.pack(w1, [[0] * 128 for _ in range(16)])
         self.assertEqual(self.code(blob), "ZERO_WEIGHTS")
 
+    def test_pack_rejects_out_of_range(self):
+        w1, w2 = weights.random_weights(256, 128, 4)
+        w1[0][0] = 128
+        with self.assertRaises(AssertionError):
+            weights.pack(w1, w2)
+
 
 class RandomWeights(unittest.TestCase):
     def test_deterministic_and_bounded(self):
