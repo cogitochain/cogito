@@ -13,3 +13,7 @@ def forward(w1, w2, x):
         acc = sum(w * xi for w, xi in zip(row, x))
         h.append(min(255, max(0, acc) >> 8))
     return h, [sum(w * hj for w, hj in zip(row, h)) for row in w2]
+
+
+def log_data(y):
+    return base64.b64encode(struct.pack("<16i", *y)).decode()
