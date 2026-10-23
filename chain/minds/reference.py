@@ -17,3 +17,13 @@ def forward(w1, w2, x):
 
 def log_data(y):
     return base64.b64encode(struct.pack("<16i", *y)).decode()
+
+
+def parse_input(s):
+    if os.path.exists(s):
+        return list(open(s, "rb").read())
+    try:
+        b = bytes.fromhex(s)
+    except ValueError:
+        b = base64.b64decode(s)
+    return list(b)
