@@ -15,6 +15,15 @@ def forward(w1, w2, x):
     return h, [sum(w * hj for w, hj in zip(row, h)) for row in w2]
 
 
+def forward_np(w1, w2, xs):
+    import numpy as np
+    w1 = np.asarray(w1, dtype=np.int64)
+    w2 = np.asarray(w2, dtype=np.int64)
+    xs = np.asarray(xs, dtype=np.int64)
+    h = np.clip(np.maximum(xs @ w1.T, 0) >> 8, 0, 255)
+    return h @ w2.T
+
+
 def log_data(y):
     return base64.b64encode(struct.pack("<16i", *y)).decode()
 
