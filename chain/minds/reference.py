@@ -36,3 +36,13 @@ def parse_input(s):
     except ValueError:
         b = base64.b64decode(s)
     return list(b)
+
+
+if __name__ == "__main__":
+    w1, w2 = load_weights(sys.argv[1])
+    x = parse_input(sys.argv[2])
+    assert len(x) == 256, "input must be 256 bytes"
+    _, y = forward(w1, w2, x)
+    print("y = %s" % y)
+    print("answer(0..9) = %d" % max(range(10), key=lambda k: (y[k], -k)))
+    print("Program data: %s" % log_data(y))
