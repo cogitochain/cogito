@@ -17,3 +17,13 @@ class ReferenceArithmetic(unittest.TestCase):
         self.assertEqual(h[1], 0)
         self.assertEqual(h[2], (127 * 255) >> 8)
         self.assertEqual(y[0], 255)
+
+    def test_random_shapes_agree(self):
+        import random
+        rng = random.Random(7)
+        for hidden in (16, 48, 128):
+            w1, w2 = random_weights(256, hidden, hidden)
+            xs = [[rng.randrange(256) for _ in range(256)] for _ in range(4)]
+            ys = reference.forward_np(w1, w2, xs).tolist()
+            for x, y in zip(xs, ys):
+                self.assertEqual(reference.forward(w1, w2, x)[1], y)
