@@ -27,3 +27,8 @@ class ReferenceArithmetic(unittest.TestCase):
             ys = reference.forward_np(w1, w2, xs).tolist()
             for x, y in zip(xs, ys):
                 self.assertEqual(reference.forward(w1, w2, x)[1], y)
+
+    def test_parse_input_forms(self):
+        b = bytes(range(256))
+        self.assertEqual(reference.parse_input(b.hex()), list(b))
+        self.assertEqual(reference.parse_input(base64.b64encode(b).decode()), list(b))
