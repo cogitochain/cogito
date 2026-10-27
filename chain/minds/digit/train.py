@@ -20,3 +20,17 @@ def idx(path):
     dims = raw[3]
     shape = [int.from_bytes(raw[4 + 4 * i:8 + 4 * i], "big") for i in range(dims)]
     return np.frombuffer(raw, dtype=np.uint8, offset=4 + 4 * dims).reshape(shape)
+
+
+def _prep(args):
+    img, box, shift = args
+    return to_input(img.astype(np.float32) / 255.0, box=box, shift=shift)
+
+
+def prep_all(images, variants, rng, pool):
+    jobs = []
+    for box, jitter in variants:
+        for img in images:
+            shift = (int(rng.integers(-1, 2)), int(rng.integers(-1, 2))) if jitter else (0, 0)
+            jobs.append((img, box, shift))
+    return np.stack(pool.map(_prep, jobs, chunksize=2000))
