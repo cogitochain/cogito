@@ -43,3 +43,8 @@ def forward(W1, W2, xq):
     h = np.clip(np.floor(np.maximum(acc, 0) / 256), 0, 255)
     y = h @ q2.T
     return q1, q2, acc, h, y
+
+
+def accuracy(W1, W2, x, labels):
+    _, _, _, _, y = forward(W1, W2, x.astype(np.float32))
+    return float((np.argmax(y[:, :10], axis=1) == labels).mean())
