@@ -34,3 +34,12 @@ def prep_all(images, variants, rng, pool):
             shift = (int(rng.integers(-1, 2)), int(rng.integers(-1, 2))) if jitter else (0, 0)
             jobs.append((img, box, shift))
     return np.stack(pool.map(_prep, jobs, chunksize=2000))
+
+
+def forward(W1, W2, xq):
+    q1 = np.round(np.clip(W1, -128 / 127, 1) * 127)
+    q2 = np.round(np.clip(W2, -128 / 127, 1) * 127)
+    acc = xq @ q1.T
+    h = np.clip(np.floor(np.maximum(acc, 0) / 256), 0, 255)
+    y = h @ q2.T
+    return q1, q2, acc, h, y
