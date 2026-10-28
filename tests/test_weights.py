@@ -22,6 +22,11 @@ class WeightsFile(unittest.TestCase):
         self.assertTrue(all(-128 <= v <= 127 for row in w1 + w2 for v in row))
 
 
+    def test_pack_round_trip(self):
+        w1, w2 = weights.validate(self.blob)
+        self.assertEqual(weights.pack(w1, w2), self.blob)
+
+
 class WeightsRefusals(unittest.TestCase):
     def code(self, blob):
         with self.assertRaises(weights.WeightsError) as cm:
