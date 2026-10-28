@@ -1,0 +1,94 @@
+{
+ "seed": 714,
+ "epochs": 16,
+ "batch": 256,
+ "lr": 0.003,
+ "augment": "box 12; box 10/11/13 with +-1 px shift",
+ "train_set": "MNIST train (60,000)",
+ "held_out": "MNIST t10k (10,000), never used in training",
+ "weights_sha256": "5cca786ff4ef6728b9c3f63cfd624582f8129b15c6322bc8fe83b8b47f6f8175",
+ "seconds": 10,
+ "log": [
+  {
+   "epoch": 1,
+   "loss": 0.3439,
+   "train_acc": 0.9484
+  },
+  {
+   "epoch": 2,
+   "loss": 0.1886,
+   "train_acc": 0.9686
+  },
+  {
+   "epoch": 3,
+   "loss": 0.1656,
+   "train_acc": 0.9691
+  },
+  {
+   "epoch": 4,
+   "loss": 0.1556,
+   "train_acc": 0.9661
+  },
+  {
+   "epoch": 5,
+   "loss": 0.141,
+   "train_acc": 0.9751
+  },
+  {
+   "epoch": 6,
+   "loss": 0.1302,
+   "train_acc": 0.9757
+  },
+  {
+   "epoch": 7,
+   "loss": 0.1156,
+   "train_acc": 0.9769
+  },
+  {
+   "epoch": 8,
+   "loss": 0.1049,
+   "train_acc": 0.9805
+  },
+  {
+   "epoch": 9,
+   "loss": 0.0918,
+   "train_acc": 0.983
+  },
+  {
+   "epoch": 10,
+   "loss": 0.0803,
+   "train_acc": 0.9857
+  },
+  {
+   "epoch": 11,
+   "loss": 0.0695,
+   "train_acc": 0.9867
+  },
+  {
+   "epoch": 12,
+   "loss": 0.0614,
+   "train_acc": 0.9875
+  },
+  {
+   "epoch": 13,
+   "loss": 0.0543,
+   "train_acc": 0.9895
+  },
+  {
+   "epoch": 14,
+   "loss": 0.0487,
+   "train_acc": 0.9901
+  },
+  {
+   "epoch": 15,
+   "loss": 0.045,
+   "train_acc": 0.9906
+  },
+  {
+   "epoch": 16,
+   "loss": 0.0426,
+   "train_acc": 0.9909
+  }
+ ],
+ "test_acc_at_train_time": 0.9801
+}
