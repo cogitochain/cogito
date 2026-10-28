@@ -26,6 +26,11 @@ class WeightsFile(unittest.TestCase):
         w1, w2 = weights.validate(self.blob)
         self.assertEqual(weights.pack(w1, w2), self.blob)
 
+    def test_row_major_layout(self):
+        w1, w2 = weights.validate(self.blob)
+        self.assertEqual(w1[3][5], weights._i8(self.blob[8 + 3 * 256 + 5]))
+        self.assertEqual(w2[7][9], weights._i8(self.blob[8 + 128 * 256 + 7 * 128 + 9]))
+
 
 class WeightsRefusals(unittest.TestCase):
     def code(self, blob):
