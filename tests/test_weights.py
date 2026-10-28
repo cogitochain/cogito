@@ -15,6 +15,12 @@ class WeightsFile(unittest.TestCase):
         self.assertEqual(weights.SIZE, 34824)
         self.assertEqual(self.blob[:8], b"COGMIND1")
 
+    def test_shape(self):
+        w1, w2 = weights.validate(self.blob)
+        self.assertEqual((len(w1), len(w1[0])), (128, 256))
+        self.assertEqual((len(w2), len(w2[0])), (16, 128))
+        self.assertTrue(all(-128 <= v <= 127 for row in w1 + w2 for v in row))
+
 
 class WeightsRefusals(unittest.TestCase):
     def code(self, blob):
