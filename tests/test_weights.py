@@ -5,6 +5,17 @@ from common import FIXTURES, TRAIN_LOG, WEIGHTS, fixtures
 import weights
 
 
+class WeightsFile(unittest.TestCase):
+    def setUp(self):
+        with open(WEIGHTS, "rb") as f:
+            self.blob = f.read()
+
+    def test_size_and_magic(self):
+        self.assertEqual(len(self.blob), 34824)
+        self.assertEqual(weights.SIZE, 34824)
+        self.assertEqual(self.blob[:8], b"COGMIND1")
+
+
 class WeightsRefusals(unittest.TestCase):
     def code(self, blob):
         with self.assertRaises(weights.WeightsError) as cm:
