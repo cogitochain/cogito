@@ -7,6 +7,10 @@ import reference
 from weights import load_weights, random_weights
 
 
+def answer(y):
+    return max(range(10), key=lambda k: (y[k], -k))
+
+
 class ReferenceAgainstFixtures(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -23,6 +27,12 @@ class ReferenceAgainstFixtures(unittest.TestCase):
             self.assertEqual(len(x), 256)
             _, y = reference.forward(self.w1, self.w2, x)
             self.assertEqual(y, r["y"], r["name"])
+
+    def test_answers_and_labels(self):
+        for r in self.rows:
+            self.assertEqual(answer(r["y"]), r["answer"], r["name"])
+            if r["label"] is not None:
+                self.assertEqual(r["answer"], r["label"], r["name"])
 
 
 class ReferenceArithmetic(unittest.TestCase):
