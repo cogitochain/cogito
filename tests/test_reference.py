@@ -17,6 +17,13 @@ class ReferenceAgainstFixtures(unittest.TestCase):
         self.assertEqual(len(self.rows), 12)
         self.assertEqual([r["name"] for r in self.rows[10:]], ["empty", "full"])
 
+    def test_outputs_equal_recorded(self):
+        for r in self.rows:
+            x = list(input_bytes(r))
+            self.assertEqual(len(x), 256)
+            _, y = reference.forward(self.w1, self.w2, x)
+            self.assertEqual(y, r["y"], r["name"])
+
 
 class ReferenceArithmetic(unittest.TestCase):
     def test_hidden_clamp_and_shift(self):
