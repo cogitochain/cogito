@@ -7,6 +7,17 @@ import reference
 from weights import load_weights, random_weights
 
 
+class ReferenceAgainstFixtures(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.w1, cls.w2 = load_weights(WEIGHTS)
+        cls.rows = fixtures()["inputs"]
+
+    def test_twelve_fixtures(self):
+        self.assertEqual(len(self.rows), 12)
+        self.assertEqual([r["name"] for r in self.rows[10:]], ["empty", "full"])
+
+
 class ReferenceArithmetic(unittest.TestCase):
     def test_hidden_clamp_and_shift(self):
         w1 = [[1] * 256, [-1] * 256, [0] * 255 + [127]] + [[0] * 256 for _ in range(125)]
