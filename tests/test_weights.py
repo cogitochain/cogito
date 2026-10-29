@@ -21,6 +21,11 @@ class WeightsFile(unittest.TestCase):
         self.assertEqual((len(w2), len(w2[0])), (16, 128))
         self.assertTrue(all(-128 <= v <= 127 for row in w1 + w2 for v in row))
 
+    def test_hash_matches_training_log_and_fixtures(self):
+        h = weights.sha256_hex(self.blob)
+        with open(TRAIN_LOG) as f:
+            self.assertEqual(json.load(f)["weights_sha256"], h)
+        self.assertEqual(fixtures()["weights_sha256"], h)
 
     def test_pack_round_trip(self):
         w1, w2 = weights.validate(self.blob)
@@ -70,3 +75,7 @@ class RandomWeights(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertNotEqual(a, weights.random_weights(256, 64, 10))
         self.assertTrue(all(-15 <= v <= 15 for m in a for row in m for v in row))
+
+
+if __name__ == "__main__":
+    unittest.main()
