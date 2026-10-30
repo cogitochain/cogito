@@ -1,0 +1,13 @@
+diff --git a/svm/tests/mock_bank.rs b/svm/tests/mock_bank.rs
+index 45a4ddd..f6fcef9 100644
+--- a/svm/tests/mock_bank.rs
++++ b/svm/tests/mock_bank.rs
+@@ -312,7 +312,7 @@ pub fn create_custom_loader() -> ProgramRuntimeEnvironment {
+     let vm_config = Config {
+         max_call_depth: compute_budget.max_call_depth,
+         stack_frame_size: compute_budget.stack_frame_size,
+-        enable_address_translation: true,
++        aligned_region_size: solana_sbpf::ebpf::MM_REGION_SIZE as usize,
+         enable_stack_frame_gaps: true,
+         instruction_meter_checkpoint_distance: 10000,
+         enable_instruction_meter: true,
