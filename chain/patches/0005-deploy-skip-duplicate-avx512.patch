@@ -1,0 +1,13 @@
+diff --git a/program-runtime/src/deploy.rs b/program-runtime/src/deploy.rs
+index 881547d..143eedc 100644
+--- a/program-runtime/src/deploy.rs
++++ b/program-runtime/src/deploy.rs
+@@ -37,7 +37,7 @@ pub fn morph_into_deployment_environment(
+ 
+     for (_key, (name, value)) in (*from).get_function_registry().iter() {
+         // Deployment of programs with sol_alloc_free is disabled. So do not register the syscall.
+-        if name != *b"sol_alloc_free_" {
++        if name != *b"sol_alloc_free_" && name != *b"sol_avx512" {
+             result.register_function(unsafe { std::str::from_utf8_unchecked(name) }, value)?;
+         }
+     }
