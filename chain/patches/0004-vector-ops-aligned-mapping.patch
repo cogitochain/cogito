@@ -1,0 +1,14 @@
+diff --git a/syscalls/src/lib.rs b/syscalls/src/lib.rs
+index 85882dd..3bd0c94 100644
+--- a/syscalls/src/lib.rs
++++ b/syscalls/src/lib.rs
+@@ -351,7 +351,8 @@ pub fn create_program_runtime_environment(
+         sanitize_user_provided_values: true,
+         enabled_sbpf_versions: min_sbpf_version..=max_sbpf_version,
+         optimize_rodata: false,
+-        aligned_memory_mapping: !feature_set.virtual_address_space_adjustments,
++        aligned_memory_mapping: true,
++        enable_vector_ops: true,
+         // Warning, do not use `Config::default()` so that configuration here is explicit.
+     };
+ 
