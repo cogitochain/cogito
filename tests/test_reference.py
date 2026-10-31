@@ -34,6 +34,15 @@ class ReferenceAgainstFixtures(unittest.TestCase):
             if r["label"] is not None:
                 self.assertEqual(r["answer"], r["label"], r["name"])
 
+    def test_program_data_line(self):
+        for r in self.rows:
+            line = "Program data: " + reference.log_data(r["y"])
+            if "log" in r:
+                self.assertEqual(line, r["log"], r["name"])
+            raw = base64.b64decode(line.split(": ", 1)[1])
+            self.assertEqual(len(raw), 64)
+            self.assertEqual(list(struct.unpack("<16i", raw)), r["y"])
+
 
 class ReferenceArithmetic(unittest.TestCase):
     def test_hidden_clamp_and_shift(self):
