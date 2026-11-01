@@ -53,6 +53,11 @@ class ReferenceAgainstFixtures(unittest.TestCase):
     def test_empty_input_gives_zero(self):
         self.assertEqual(self.rows[10]["y"], [0] * 16)
 
+    def test_numpy_path_equals_integer_path(self):
+        xs = [list(input_bytes(r)) for r in self.rows]
+        ys = reference.forward_np(self.w1, self.w2, xs).tolist()
+        self.assertEqual(ys, [r["y"] for r in self.rows])
+
 
 class ReferenceArithmetic(unittest.TestCase):
     def test_hidden_clamp_and_shift(self):
@@ -79,3 +84,7 @@ class ReferenceArithmetic(unittest.TestCase):
         b = bytes(range(256))
         self.assertEqual(reference.parse_input(b.hex()), list(b))
         self.assertEqual(reference.parse_input(base64.b64encode(b).decode()), list(b))
+
+
+if __name__ == "__main__":
+    unittest.main()
