@@ -50,6 +50,9 @@ class ReferenceAgainstFixtures(unittest.TestCase):
         for i, r in enumerate(self.rows):
             self.assertEqual(raw[256 * i:256 * (i + 1)], input_bytes(r), r["name"])
 
+    def test_empty_input_gives_zero(self):
+        self.assertEqual(self.rows[10]["y"], [0] * 16)
+
 
 class ReferenceArithmetic(unittest.TestCase):
     def test_hidden_clamp_and_shift(self):
