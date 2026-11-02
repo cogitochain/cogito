@@ -40,3 +40,26 @@ def murmur3_32(data, seed=0):
 
 AVX = murmur3_32(b"sol_avx512")
 LOGDATA = murmur3_32(b"sol_log_data")
+
+
+class Asm:
+    def __init__(self):
+        self.ins, self.labels, self.fix = [], {}, []
+
+    def raw(self, op, dst=0, src=0, off=0, imm=0):
+        self.ins.append([op, dst, src, off, imm & 0xffffffff])
+
+    def label(self, n):
+        self.labels[n] = len(self.ins)
+
+
+    def jmp(self, op, dst, imm, lbl):
+        self.fix.append((len(self.ins), lbl))
+        self.raw(op, dst, 0, 0, imm)
+
+
+    def code(self):
+        for i, lbl in self.fix:
+            self.ins[i][3] = self.labels[lbl] - (i + 1)
+        return b"".join(struct.pack("<BBhI", op, (dst & 15) | (src << 4), off, imm)
+                        for op, dst, src, off, imm in self.ins)
