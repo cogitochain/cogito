@@ -59,6 +59,12 @@ class Asm:
     def call(self, h): self.raw(0x85, 0, 0, 0, h)
     def mov(self, dst, imm): self.raw(0xb7, dst, 0, 0, imm)
     def movr(self, dst, src): self.raw(0xbf, dst, src)
+    def add(self, dst, imm): self.raw(0x07, dst, 0, 0, imm)
+    def addr(self, dst, src): self.raw(0x0f, dst, src)
+    def mulr(self, dst, src): self.raw(0x2f, dst, src)
+    def lsh(self, dst, imm): self.raw(0x67, dst, 0, 0, imm)
+    def arsh(self, dst, imm): self.raw(0xc7, dst, 0, 0, imm)
+    def rsh(self, dst, imm): self.raw(0x77, dst, 0, 0, imm)
 
     def jmp(self, op, dst, imm, lbl):
         self.fix.append((len(self.ins), lbl))
