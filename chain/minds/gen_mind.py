@@ -75,6 +75,9 @@ class Asm:
         self.fix.append((len(self.ins), lbl))
         self.raw(op, dst, 0, 0, imm)
 
+    def jlt(self, dst, imm, lbl): self.jmp(0xa5, dst, imm, lbl)
+    def jsgt(self, dst, imm, lbl): self.jmp(0x65, dst, imm, lbl)
+    def jne(self, dst, imm, lbl): self.jmp(0x55, dst, imm, lbl)
     def ret(self): self.raw(0x95)
 
     def code(self):
