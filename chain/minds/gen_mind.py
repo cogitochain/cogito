@@ -65,6 +65,11 @@ class Asm:
     def lsh(self, dst, imm): self.raw(0x67, dst, 0, 0, imm)
     def arsh(self, dst, imm): self.raw(0xc7, dst, 0, 0, imm)
     def rsh(self, dst, imm): self.raw(0x77, dst, 0, 0, imm)
+    def ldxb(self, dst, src, off=0): self.raw(0x71, dst, src, off)
+    def ldxdw(self, dst, src, off=0): self.raw(0x79, dst, src, off)
+    def stxb(self, dst, off, src): self.raw(0x73, dst, src, off)
+    def stxw(self, dst, off, src): self.raw(0x63, dst, src, off)
+    def stxdw(self, dst, off, src): self.raw(0x7b, dst, src, off)
 
     def jmp(self, op, dst, imm, lbl):
         self.fix.append((len(self.ins), lbl))
