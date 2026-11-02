@@ -52,11 +52,19 @@ class Asm:
     def label(self, n):
         self.labels[n] = len(self.ins)
 
+    def lddw(self, dst, v):
+        self.raw(0x18, dst, 0, 0, v & 0xffffffff)
+        self.raw(0x00, 0, 0, 0, (v >> 32) & 0xffffffff)
+
+    def call(self, h): self.raw(0x85, 0, 0, 0, h)
+    def mov(self, dst, imm): self.raw(0xb7, dst, 0, 0, imm)
+    def movr(self, dst, src): self.raw(0xbf, dst, src)
 
     def jmp(self, op, dst, imm, lbl):
         self.fix.append((len(self.ins), lbl))
         self.raw(op, dst, 0, 0, imm)
 
+    def ret(self): self.raw(0x95)
 
     def code(self):
         for i, lbl in self.fix:
