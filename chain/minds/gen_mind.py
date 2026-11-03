@@ -5,6 +5,7 @@ import sys
 from weights import load_weights, random_weights
 
 HEAP = 0x300000000
+INPUT = 0x400000000
 OUT = 16
 
 
@@ -95,3 +96,25 @@ def layout(n_in, hidden):
     ya = ha + ((hidden + 64 + 63) // 64) * 64
     slice_a = ya + 64
     return ha, ya, slice_a
+
+
+def errors(a):
+    a.label("err_accounts")
+    a.mov(0, 1)
+    a.ret()
+    a.label("err_len")
+    a.mov(0, 2)
+    a.ret()
+
+
+def prologue(a, n_in, early=False):
+    a.lddw(6, INPUT)
+    a.ldxdw(2, 6, 0)
+    a.jne(2, 0, "err_accounts")
+    a.ldxdw(2, 6, 8)
+    a.jne(2, n_in, "err_len")
+    if early:
+        a.fix.append((len(a.ins), "start"))
+        a.raw(0x05)
+        errors(a)
+        a.label("start")
