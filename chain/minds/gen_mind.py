@@ -137,6 +137,87 @@ def epilogue(a, ya, slice_a, early=False):
         errors(a)
 
 
+OPS = {"ld": 0x00, "st": 0x01, "ldbc.d": 0x02, "zero": 0x08, "dpbusd": 0x50, "max.d": 0x20,
+       "shri.d": 0x34, "narrowus.d.b": 0x60}
+
+
+def build_vector(w1, w2):
+    try:
+        return _build_vector(w1, w2, False)
+    except struct.error:
+        return _build_vector(w1, w2, True)
+
+
+def _build_vector(w1, w2, early):
+    hidden, n_in = len(w1), len(w1[0])
+    assert n_in % 4 == 0 and hidden % 16 == 0 and len(w2) == OUT
+    groups = hidden // 16
+    chunks = [list(range(c, min(c + 8, groups))) for c in range(0, groups, 8)]
+    ha, ya, slice_a = layout(n_in, hidden)
+    xa = INPUT + 16
+    count = 0
+    for _ in range(2):
+        desc_list, desc_index = [], {}
+
+        def desc(op, imm8=0, out=0, in0=0, in1=0, off=0):
+            key = (op, imm8, out, in0, in1, off)
+            if key not in desc_index:
+                desc_index[key] = len(desc_list)
+                desc_list.append(bytes([OPS[op], imm8, out, in0, in1, 0]) + struct.pack("<h", off) + bytes(8))
+            return RO + 16 * desc_index[key]
+
+        a = Asm()
+
+        def v(op, imm8=0, out=0, in0=0, in1=0, off=0):
+            a.lddw(1, desc(op, imm8, out, in0, in1, off))
+            a.call(AVX)
+
+        prologue(a, n_in, early)
+        w1a = RO + 16 * count
+        pos = w1a
+        for chunk in chunks:
+            nk = len(chunk)
+            for k in range(nk):
+                v("zero", out=k)
+            for st in range(n_in // 4):
+                a.lddw(2, xa + 4 * st)
+                v("ldbc.d", out=8)
+                a.lddw(2, pos)
+                for k in range(nk):
+                    v("ld", out=9 + k, off=k * 64)
+                    v("dpbusd", out=k, in0=8, in1=9 + k)
+                pos += nk * 64
+            v("zero", out=20)
+            a.lddw(2, ha + chunk[0] * 16)
+            for k in range(nk):
+                v("max.d", out=k, in0=k, in1=20)
+                v("shri.d", imm8=8, out=k, in0=k)
+                v("narrowus.d.b", out=21, in0=k)
+                v("st", in0=21, off=k * 16)
+        w2a = pos
+        v("zero", out=0)
+        for st in range(hidden // 4):
+            a.lddw(2, ha + 4 * st)
+            v("ldbc.d", out=8)
+            a.lddw(2, w2a + st * 64)
+            v("ld", out=9)
+            v("dpbusd", out=0, in0=8, in1=9)
+        a.lddw(2, ya)
+        v("st", in0=0)
+        epilogue(a, ya, slice_a, early)
+        count = len(desc_list)
+    data = bytearray(b"".join(desc_list))
+    for chunk in chunks:
+        for st in range(n_in // 4):
+            for k in chunk:
+                for n in range(16):
+                    data += bytes((w & 0xff) for w in w1[16 * k + n][4 * st:4 * st + 4])
+    for st in range(hidden // 4):
+        for n in range(OUT):
+            data += bytes((w & 0xff) for w in w2[n][4 * st:4 * st + 4])
+    return a.code(), bytes(data)
+
+
 def build_scalar(w1, w2):
     hidden, n_in = len(w1), len(w1[0])
     ha, ya, slice_a = layout(n_in, hidden)
