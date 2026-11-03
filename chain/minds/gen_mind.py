@@ -4,6 +4,9 @@ import sys
 
 from weights import load_weights, random_weights
 
+HEAP = 0x300000000
+OUT = 16
+
 
 def murmur3_32(data, seed=0):
     c1, c2 = 0xcc9e2d51, 0x1b873593
@@ -85,3 +88,10 @@ class Asm:
             self.ins[i][3] = self.labels[lbl] - (i + 1)
         return b"".join(struct.pack("<BBhI", op, (dst & 15) | (src << 4), off, imm)
                         for op, dst, src, off, imm in self.ins)
+
+
+def layout(n_in, hidden):
+    ha = HEAP
+    ya = ha + ((hidden + 64 + 63) // 64) * 64
+    slice_a = ya + 64
+    return ha, ya, slice_a
