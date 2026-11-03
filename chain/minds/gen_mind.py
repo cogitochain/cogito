@@ -5,6 +5,7 @@ import sys
 from weights import load_weights, random_weights
 
 RO = 0x0
+TEXT = 0x100000000
 HEAP = 0x300000000
 INPUT = 0x400000000
 OUT = 16
@@ -198,3 +199,17 @@ def build_scalar(w1, w2):
     epilogue(a, ya, slice_a)
     data = b"".join(bytes((w & 0xff) for w in row) for row in w1) + b"".join(bytes((w & 0xff) for w in row) for row in w2)
     return a.code(), data
+
+
+def elf(code, data):
+    pad = lambda b: b + bytes((-len(b)) % 8)
+    ro, tx = pad(data), pad(code)
+    ehsize, phsize = 64, 56
+    off_ro = ehsize + 2 * phsize
+    off_tx = off_ro + len(ro)
+    PT_LOAD, PF_X, PF_R = 1, 1, 4
+    eh = b"\x7fELF" + bytes([2, 1, 1, 0, 0]) + bytes(7)
+    eh += struct.pack("<HHIQQQIHHHHHH", 3, 247, 1, TEXT, ehsize, 0, 3, ehsize, phsize, 2, 64, 0, 0)
+    ph = struct.pack("<IIQQQQQQ", PT_LOAD, PF_R, off_ro, RO, RO, len(ro), len(ro), 8)
+    ph += struct.pack("<IIQQQQQQ", PT_LOAD, PF_X, off_tx, TEXT, TEXT, len(tx), len(tx), 8)
+    return eh + ph + ro + tx
