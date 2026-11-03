@@ -4,6 +4,7 @@ import sys
 
 from weights import load_weights, random_weights
 
+RO = 0x0
 HEAP = 0x300000000
 INPUT = 0x400000000
 OUT = 16
@@ -133,3 +134,67 @@ def epilogue(a, ya, slice_a, early=False):
     a.ret()
     if not early:
         errors(a)
+
+
+def build_scalar(w1, w2):
+    hidden, n_in = len(w1), len(w1[0])
+    ha, ya, slice_a = layout(n_in, hidden)
+    xa = INPUT + 16
+    w1a = RO
+    w2a = w1a + hidden * n_in
+    a = Asm()
+    prologue(a, n_in)
+    a.lddw(6, w1a)
+    a.lddw(7, ha)
+    a.mov(8, 0)
+    a.label("l1_out")
+    a.mov(0, 0)
+    a.lddw(9, xa)
+    a.mov(4, 0)
+    a.label("l1_in")
+    a.ldxb(2, 9)
+    a.ldxb(3, 6)
+    a.lsh(3, 56)
+    a.arsh(3, 56)
+    a.mulr(2, 3)
+    a.addr(0, 2)
+    a.add(9, 1)
+    a.add(6, 1)
+    a.add(4, 1)
+    a.jlt(4, n_in, "l1_in")
+    a.jsgt(0, 0, "l1_pos")
+    a.mov(0, 0)
+    a.label("l1_pos")
+    a.rsh(0, 8)
+    a.jlt(0, 256, "l1_ok")
+    a.mov(0, 255)
+    a.label("l1_ok")
+    a.stxb(7, 0, 0)
+    a.add(7, 1)
+    a.add(8, 1)
+    a.jlt(8, hidden, "l1_out")
+    a.lddw(6, w2a)
+    a.mov(8, 0)
+    a.lddw(1, ya)
+    a.label("l2_out")
+    a.mov(0, 0)
+    a.lddw(9, ha)
+    a.mov(4, 0)
+    a.label("l2_in")
+    a.ldxb(2, 9)
+    a.ldxb(3, 6)
+    a.lsh(3, 56)
+    a.arsh(3, 56)
+    a.mulr(2, 3)
+    a.addr(0, 2)
+    a.add(9, 1)
+    a.add(6, 1)
+    a.add(4, 1)
+    a.jlt(4, hidden, "l2_in")
+    a.stxw(1, 0, 0)
+    a.add(1, 4)
+    a.add(8, 1)
+    a.jlt(8, OUT, "l2_out")
+    epilogue(a, ya, slice_a)
+    data = b"".join(bytes((w & 0xff) for w in row) for row in w1) + b"".join(bytes((w & 0xff) for w in row) for row in w2)
+    return a.code(), data
