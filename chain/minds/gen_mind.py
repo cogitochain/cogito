@@ -118,3 +118,18 @@ def prologue(a, n_in, early=False):
         a.raw(0x05)
         errors(a)
         a.label("start")
+
+
+def epilogue(a, ya, slice_a, early=False):
+    a.lddw(3, ya)
+    a.lddw(4, slice_a)
+    a.stxdw(4, 0, 3)
+    a.mov(3, 4 * OUT)
+    a.stxdw(4, 8, 3)
+    a.movr(1, 4)
+    a.mov(2, 1)
+    a.call(LOGDATA)
+    a.mov(0, 0)
+    a.ret()
+    if not early:
+        errors(a)
