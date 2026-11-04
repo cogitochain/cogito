@@ -1,0 +1,38 @@
+{
+ "multiply_adds": 34816,
+ "vector": {
+  "vector_ops": 1227,
+  "instruction_slots": 4091,
+  "by_layer": {
+   "layer1 (256 -> 128)": {
+    "total": 1096,
+    "zero": 8,
+    "ldbc.d": 64,
+    "ld": 512,
+    "dpbusd": 512
+   },
+   "requantize (relu, >>8, to bytes)": {
+    "total": 33,
+    "zero": 1,
+    "max.d": 8,
+    "shri.d": 8,
+    "narrowus.d.b": 8,
+    "st": 8
+   },
+   "layer2 (128 -> 16)": {
+    "total": 98,
+    "zero": 1,
+    "ldbc.d": 32,
+    "ld": 32,
+    "dpbusd": 32,
+    "st": 1
+   }
+  },
+  "dpbusd_multiply_adds_each": 64
+ },
+ "scalar": {
+  "instruction_slots_static": 73,
+  "inner_loop_instructions_per_multiply_add": 10
+ },
+ "note": "static counts from chain/minds/gen_mind.py; executed counts (CU) are in the rig records"
+}
