@@ -294,3 +294,25 @@ def elf(code, data):
     ph = struct.pack("<IIQQQQQQ", PT_LOAD, PF_R, off_ro, RO, RO, len(ro), len(ro), 8)
     ph += struct.pack("<IIQQQQQQ", PT_LOAD, PF_X, off_tx, TEXT, TEXT, len(tx), len(tx), 8)
     return eh + ph + ro + tx
+
+
+def write(kind, w1, w2, out):
+    code, data = (build_vector if kind == "vector" else build_scalar)(w1, w2)
+    blob = elf(code, data)
+    with open(out, "wb") as f:
+        f.write(blob)
+    print("gen-mind kind=%s in=%d hidden=%d out=%s bytes=%d insns=%d" % (kind, len(w1[0]), len(w1), out, len(blob), len(code) // 8))
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    if len(args) == 3 and args[0] in ("elf-vector", "elf-scalar"):
+        w1, w2 = load_weights(args[1])
+        write(args[0][4:], w1, w2, args[2])
+    elif len(args) == 6 and args[0] == "random-elf":
+        w1, w2 = random_weights(int(args[2]), int(args[3]), int(args[4]))
+        write(args[1], w1, w2, args[5])
+    else:
+        sys.stderr.write("usage: gen_mind.py elf-vector|elf-scalar <weights.bin> <out.so>\n"
+                         "       gen_mind.py random-elf <vector|scalar> <in> <hidden> <seed> <out.so>\n")
+        sys.exit(2)
