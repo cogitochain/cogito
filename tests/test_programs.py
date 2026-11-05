@@ -41,6 +41,35 @@ class Generator(unittest.TestCase):
         self.assertNotEqual(gen_mind.AVX, gen_mind.LOGDATA)
         self.assertEqual(gen_mind.murmur3_32(b""), 0)
 
+    def test_vector_ops_decode(self):
+        _, _, segs = sbpf.load_elf(self.vector)
+        ro, text = segs[0][3], segs[1][3]
+        ins = sbpf.decode(text)
+        known = set(gen_mind.OPS.values())
+        names = {v: k for k, v in gen_mind.OPS.items()}
+        seen = []
+        for i, (op, regs, _, imm) in enumerate(ins):
+            if op == 0x85 and imm == gen_mind.AVX:
+                lo, hi = ins[i - 2], ins[i - 1]
+                self.assertEqual((lo[0], lo[1] & 15), (0x18, 1))
+                d = lo[3] | (hi[3] << 32)
+                self.assertLess(d + 16, len(ro))
+                self.assertIn(ro[d], known)
+                self.assertEqual(ro[d + 5], 0)
+                self.assertEqual(ro[d + 8:d + 16], bytes(8))
+                seen.append(names[ro[d]])
+        with open(OP_COUNTS) as f:
+            counts = json.load(f)
+        self.assertEqual(len(seen), counts["vector"]["vector_ops"])
+        self.assertEqual(len(ins), counts["vector"]["instruction_slots"])
+        by_kind = {}
+        for layer in counts["vector"]["by_layer"].values():
+            for k, n in layer.items():
+                if k != "total":
+                    by_kind[k] = by_kind.get(k, 0) + n
+        self.assertEqual({k: seen.count(k) for k in set(seen)}, by_kind)
+        self.assertEqual(seen.count("dpbusd") * counts["vector"]["dpbusd_multiply_adds_each"], counts["multiply_adds"])
+
 
     def test_weights_in_rodata(self):
         _, _, segs = sbpf.load_elf(self.scalar)
