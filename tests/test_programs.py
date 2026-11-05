@@ -70,6 +70,13 @@ class Generator(unittest.TestCase):
         self.assertEqual({k: seen.count(k) for k in set(seen)}, by_kind)
         self.assertEqual(seen.count("dpbusd") * counts["vector"]["dpbusd_multiply_adds_each"], counts["multiply_adds"])
 
+    def test_scalar_has_no_vector_ops(self):
+        _, _, segs = sbpf.load_elf(self.scalar)
+        ins = sbpf.decode(segs[1][3])
+        with open(OP_COUNTS) as f:
+            self.assertEqual(len(ins), json.load(f)["scalar"]["instruction_slots_static"])
+        self.assertFalse(any(op == 0x85 and imm == gen_mind.AVX for op, _, _, imm in ins))
+        self.assertEqual(sum(1 for op, _, _, imm in ins if op == 0x85 and imm == gen_mind.LOGDATA), 1)
 
     def test_weights_in_rodata(self):
         _, _, segs = sbpf.load_elf(self.scalar)
