@@ -40,3 +40,10 @@ class Generator(unittest.TestCase):
         self.assertEqual(gen_mind.murmur3_32(b"sol_log_data"), gen_mind.LOGDATA)
         self.assertNotEqual(gen_mind.AVX, gen_mind.LOGDATA)
         self.assertEqual(gen_mind.murmur3_32(b""), 0)
+
+
+    def test_weights_in_rodata(self):
+        _, _, segs = sbpf.load_elf(self.scalar)
+        ro = segs[0][3]
+        flat = bytes(w & 0xff for row in self.w1 for w in row) + bytes(w & 0xff for row in self.w2 for w in row)
+        self.assertEqual(ro[:len(flat)], flat)
