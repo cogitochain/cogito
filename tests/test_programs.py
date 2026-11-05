@@ -28,6 +28,14 @@ class Generator(unittest.TestCase):
         cls.scalar = build("scalar", cls.w1, cls.w2)
 
 
+    def test_elf_layout(self):
+        for blob in (self.vector, self.scalar):
+            machine, entry, segs = sbpf.load_elf(blob)
+            self.assertEqual(machine, 247)
+            self.assertEqual(entry, sbpf.TEXT)
+            self.assertEqual([(t, fl, va) for t, fl, va, _ in segs], [(1, 4, sbpf.RO), (1, 1, sbpf.TEXT)])
+            self.assertEqual(len(segs[1][3]) % 8, 0)
+
     def test_syscall_hashes(self):
         self.assertEqual(gen_mind.murmur3_32(b"sol_log_data"), gen_mind.LOGDATA)
         self.assertNotEqual(gen_mind.AVX, gen_mind.LOGDATA)
