@@ -14,3 +14,7 @@ def load_elf(blob):
         p_type, p_flags, off, vaddr, _, filesz, _, _ = struct.unpack_from("<IIQQQQQQ", blob, phoff + 56 * i)
         segs.append((p_type, p_flags, vaddr, blob[off:off + filesz]))
     return machine, entry, segs
+
+
+def decode(text):
+    return [struct.unpack_from("<BBhI", text, i) for i in range(0, len(text), 8)]
