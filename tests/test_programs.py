@@ -102,3 +102,8 @@ class Generator(unittest.TestCase):
         ro = segs[0][3]
         flat = bytes(w & 0xff for row in self.w1 for w in row) + bytes(w & 0xff for row in self.w2 for w in row)
         self.assertEqual(ro[:len(flat)], flat)
+
+    def test_random_elf_is_deterministic(self):
+        w1, w2 = random_weights(256, 32, 11)
+        self.assertEqual(build("vector", w1, w2), build("vector", w1, w2))
+        self.assertNotEqual(build("scalar", w1, w2), build("scalar", *random_weights(256, 32, 12)))
