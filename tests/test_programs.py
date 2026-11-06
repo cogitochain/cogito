@@ -124,3 +124,9 @@ class ScalarProgramExecution(unittest.TestCase):
             self.assertEqual(rc, 0, r["name"])
             self.assertEqual(len(logged), 1)
             self.assertEqual(list(struct.unpack("<16i", logged[0])), r["y"], r["name"])
+
+    def test_instruction_count_of_one_thought(self):
+        x = input_bytes(fixtures()["inputs"][0])
+        _, _, steps = self.think(x)
+        self.assertEqual(steps, 349694)
+        self.assertEqual(steps + 264, 349958)
