@@ -130,3 +130,8 @@ class ScalarProgramExecution(unittest.TestCase):
         _, _, steps = self.think(x)
         self.assertEqual(steps, 349694)
         self.assertEqual(steps + 264, 349958)
+
+    def test_wrong_length_refused(self):
+        for n in (0, 255, 257):
+            rc, logged, _ = self.think(bytes(n))
+            self.assertEqual((rc, logged), (2, []), n)
