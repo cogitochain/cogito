@@ -107,3 +107,20 @@ class Generator(unittest.TestCase):
         w1, w2 = random_weights(256, 32, 11)
         self.assertEqual(build("vector", w1, w2), build("vector", w1, w2))
         self.assertNotEqual(build("scalar", w1, w2), build("scalar", *random_weights(256, 32, 12)))
+
+
+class ScalarProgramExecution(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.w1, cls.w2 = load_weights(WEIGHTS)
+        cls.scalar = build("scalar", cls.w1, cls.w2)
+
+    def think(self, x, accounts=0):
+        return sbpf.run(self.scalar, x, accounts=accounts, logdata_hash=gen_mind.LOGDATA)
+
+    def test_logged_outputs_equal_fixtures(self):
+        for r in fixtures()["inputs"][:3] + fixtures()["inputs"][10:]:
+            rc, logged, _ = self.think(input_bytes(r))
+            self.assertEqual(rc, 0, r["name"])
+            self.assertEqual(len(logged), 1)
+            self.assertEqual(list(struct.unpack("<16i", logged[0])), r["y"], r["name"])
