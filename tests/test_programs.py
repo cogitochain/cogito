@@ -41,6 +41,11 @@ class Generator(unittest.TestCase):
                 with open(out, "rb") as f:
                     self.assertEqual(hashlib.sha256(f.read()).hexdigest(), want)
 
+    def test_cli_usage_exit_code(self):
+        r = subprocess.run([sys.executable, os.path.join(MINDS, "gen_mind.py")], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("gen_mind.py elf-vector", r.stderr)
+        self.assertIn("random-elf", r.stderr)
 
     def test_elf_layout(self):
         for blob in (self.vector, self.scalar):
