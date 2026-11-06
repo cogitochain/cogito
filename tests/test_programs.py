@@ -31,6 +31,16 @@ class Generator(unittest.TestCase):
         self.assertEqual(hashlib.sha256(self.vector).hexdigest(), DIGIT_VECTOR_SHA256)
         self.assertEqual(hashlib.sha256(self.scalar).hexdigest(), DIGIT_SCALAR_SHA256)
 
+    def test_cli_writes_the_same_bytes(self):
+        with tempfile.TemporaryDirectory() as d:
+            for kind, want in (("vector", DIGIT_VECTOR_SHA256), ("scalar", DIGIT_SCALAR_SHA256)):
+                out = os.path.join(d, kind + ".so")
+                r = subprocess.run([sys.executable, os.path.join(MINDS, "gen_mind.py"), "elf-" + kind, WEIGHTS, out],
+                                   capture_output=True, text=True, check=True)
+                self.assertIn("kind=%s" % kind, r.stdout)
+                with open(out, "rb") as f:
+                    self.assertEqual(hashlib.sha256(f.read()).hexdigest(), want)
+
 
     def test_elf_layout(self):
         for blob in (self.vector, self.scalar):
