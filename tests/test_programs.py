@@ -27,6 +27,10 @@ class Generator(unittest.TestCase):
         cls.vector = build("vector", cls.w1, cls.w2)
         cls.scalar = build("scalar", cls.w1, cls.w2)
 
+    def test_digit_programs_are_byte_identical_to_deployed(self):
+        self.assertEqual(hashlib.sha256(self.vector).hexdigest(), DIGIT_VECTOR_SHA256)
+        self.assertEqual(hashlib.sha256(self.scalar).hexdigest(), DIGIT_SCALAR_SHA256)
+
 
     def test_elf_layout(self):
         for blob in (self.vector, self.scalar):
