@@ -135,3 +135,7 @@ class ScalarProgramExecution(unittest.TestCase):
         for n in (0, 255, 257):
             rc, logged, _ = self.think(bytes(n))
             self.assertEqual((rc, logged), (2, []), n)
+
+    def test_account_refused(self):
+        rc, logged, _ = self.think(bytes(256), accounts=1)
+        self.assertEqual((rc, logged), (1, []))
