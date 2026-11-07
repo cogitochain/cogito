@@ -139,3 +139,17 @@ class ScalarProgramExecution(unittest.TestCase):
     def test_account_refused(self):
         rc, logged, _ = self.think(bytes(256), accounts=1)
         self.assertEqual((rc, logged), (1, []))
+
+    def test_random_mind_matches_reference(self):
+        import random
+        w1, w2 = random_weights(256, 16, 5)
+        blob = build("scalar", w1, w2)
+        x = [random.Random(3).randrange(256) for _ in range(256)]
+        rc, logged, _ = sbpf.run(blob, bytes(x), logdata_hash=gen_mind.LOGDATA)
+        self.assertEqual(rc, 0)
+        want = [((v + 2**31) % 2**32) - 2**31 for v in forward(w1, w2, x)[1]]
+        self.assertEqual(list(struct.unpack("<16i", logged[0])), want)
+
+
+if __name__ == "__main__":
+    unittest.main()
