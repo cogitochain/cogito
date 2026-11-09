@@ -23,3 +23,21 @@ declare_builtin_function!(
         Ok(0)
     }
 );
+
+declare_builtin_function!(
+    SyscallLogData,
+    fn rust(c: &mut TestContextObject, addr: u64, len: u64, _a: u64, _b: u64, _d: u64,) -> Result<u64, Box<dyn std::error::Error>> {
+        let mut out = Vec::new();
+        for i in 0..len {
+            let hb = Result::from(c.memory_mapping.map(AccessType::Load, addr + 16 * i, 16))?;
+            let s: &[u8] = unsafe { hb.ptr().as_ref_unchecked() };
+            let p = u64::from_le_bytes(s[0..8].try_into().unwrap());
+            let n = u64::from_le_bytes(s[8..16].try_into().unwrap());
+            let fb = Result::from(c.memory_mapping.map(AccessType::Load, p, n))?;
+            let f: &[u8] = unsafe { fb.ptr().as_ref_unchecked() };
+            out.extend_from_slice(&f[..n as usize]);
+        }
+        LOGGED.with(|l| *l.borrow_mut() = out);
+        Ok(0)
+    }
+);
