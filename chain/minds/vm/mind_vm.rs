@@ -41,3 +41,23 @@ declare_builtin_function!(
         Ok(0)
     }
 );
+
+fn hex(b: &[u8]) -> String { b.iter().map(|x| format!("{x:02x}")).collect() }
+
+fn load(path: &str) -> Executable<TestContextObject> {
+    let config = Config {
+        enable_vector_ops: true,
+        aligned_memory_mapping: true,
+        enable_instruction_meter: true,
+        enabled_sbpf_versions: SBPFVersion::V3..=SBPFVersion::V3,
+        ..Config::default()
+    };
+    let mut loader = BuiltinProgram::new_loader(config);
+    loader.register_definition::<SyscallLog64>("sol_log_64_").unwrap();
+    loader.register_definition::<SyscallLogData>("sol_log_data").unwrap();
+    let elf = std::fs::read(path).unwrap();
+    let mut exe = Executable::<TestContextObject>::from_elf(&elf, Arc::new(loader)).unwrap();
+    exe.verify::<RequisiteVerifier>().unwrap();
+    exe.jit_compile().unwrap();
+    exe
+}
