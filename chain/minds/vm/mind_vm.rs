@@ -61,3 +61,12 @@ fn load(path: &str) -> Executable<TestContextObject> {
     exe.jit_compile().unwrap();
     exe
 }
+
+fn input_region(data: &[u8]) -> Vec<u8> {
+    let mut v = Vec::new();
+    v.extend_from_slice(&0u64.to_le_bytes());
+    v.extend_from_slice(&(data.len() as u64).to_le_bytes());
+    v.extend_from_slice(data);
+    v.extend_from_slice(&[0u8; 32]);
+    v
+}
