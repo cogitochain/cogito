@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  SBPF_REPO: github.com/temporalxyz/sbpf
+  SBPF_REV: 585f8935f10863b31ce5fc5676aa16879a8eb1ee
+  AGAVE_TAG: v4.5.0-alpha.4
+
+jobs:
+  minds:
+    name: build and test the minds
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - name: Install dependencies
+        run: python3 -m pip install -r requirements.txt
+      - name: Lint (byte-compile every source file)
+        run: python3 -m compileall -q chain tests
+      - name: Build the digit mind programs
+        run: |
+          mkdir -p out
+          python3 chain/minds/gen_mind.py elf-vector chain/minds/digit/weights.bin out/digit-vector.so
+          python3 chain/minds/gen_mind.py elf-scalar chain/minds/digit/weights.bin out/digit-scalar.so
+      - name: Test
+        run: python3 -m unittest discover -s tests -v
