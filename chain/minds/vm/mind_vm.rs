@@ -95,3 +95,29 @@ fn run(exe: &Executable<TestContextObject>, data: &[u8], jit: bool, iters: usize
     times.sort();
     (cu, rc, LOGGED.with(|l| l.borrow().clone()), times)
 }
+
+#[test]
+#[ignore]
+fn mind_vm() {
+    let paths = std::env::var("MIND_SO").expect("MIND_SO");
+    let inputs = std::fs::read(std::env::var("MIND_INPUTS").expect("MIND_INPUTS")).unwrap();
+    let mode = std::env::var("MIND_MODE").unwrap_or_else(|_| "run".into());
+    let list: Vec<&[u8]> = if inputs.is_empty() { vec![&[][..]] } else { inputs.chunks(256).collect() };
+    for p in paths.split_whitespace() {
+        let exe = load(p);
+        if mode == "bench" {
+            for jit in [true, false] {
+                let iters = if jit { 2000 } else { 50 };
+                let (cu, _, _, t) = run(&exe, list[0], jit, iters);
+                println!("mind-bench {} mode={} cu={} p50_ns={} p99_ns={} min_ns={}", p, if jit { "jit" } else { "interp" }, cu, t[iters / 2], t[iters * 99 / 100], t[0]);
+            }
+        } else {
+            for (i, x) in list.iter().enumerate() {
+                for jit in [true, false] {
+                    let (cu, rc, logged, _) = run(&exe, x, jit, 1);
+                    println!("mind-run {} idx={} mode={} cu={} rc={} logged={}", p, i, if jit { "jit" } else { "interp" }, cu, rc, hex(&logged));
+                }
+            }
+        }
+    }
+}
