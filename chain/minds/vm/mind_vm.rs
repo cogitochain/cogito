@@ -70,3 +70,28 @@ fn input_region(data: &[u8]) -> Vec<u8> {
     v.extend_from_slice(&[0u8; 32]);
     v
 }
+
+fn run(exe: &Executable<TestContextObject>, data: &[u8], jit: bool, iters: usize) -> (u64, u64, Vec<u8>, Vec<u64>) {
+    let mut stack = AlignedMemory::<{ ebpf::HOST_ALIGN }>::zero_filled(exe.get_config().stack_size());
+    let mut heap = AlignedMemory::<{ ebpf::HOST_ALIGN }>::zero_filled(32 * 1024);
+    let mut input = input_region(data);
+    let mut call_frames = vec![CallFrame::default(); exe.get_config().max_call_depth];
+    let mut ctx = TestContextObject::new(1_400_000);
+    let regions = vec![MemoryRegion::new(&raw mut input[..], ebpf::MM_INPUT_START)];
+    ctx.memory_mapping = create_memory_mapping(exe, &mut stack, &mut heap, regions, None).unwrap();
+    let stack_len = exe.get_config().stack_size();
+    let mut times = Vec::with_capacity(iters);
+    let (mut cu, mut rc) = (0, 0);
+    for _ in 0..iters {
+        ctx.remaining = 1_400_000;
+        let mut vm = EbpfVm::new(exe.get_loader().clone(), exe.get_sbpf_version(), &mut ctx, stack_len);
+        vm.registers[1] = ebpf::MM_INPUT_START;
+        let t = Instant::now();
+        let (count, result) = vm.execute_program(exe, &mut if jit { ExecutionMode::Jit } else { ExecutionMode::Interpreted }, &mut call_frames);
+        times.push(t.elapsed().as_nanos() as u64);
+        rc = match result { solana_sbpf::error::StableResult::Ok(v) => v, solana_sbpf::error::StableResult::Err(e) => panic!("{e:?}") };
+        cu = count;
+    }
+    times.sort();
+    (cu, rc, LOGGED.with(|l| l.borrow().clone()), times)
+}
