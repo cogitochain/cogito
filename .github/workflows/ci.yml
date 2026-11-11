@@ -33,3 +33,13 @@ jobs:
           python3 chain/minds/gen_mind.py elf-scalar chain/minds/digit/weights.bin out/digit-scalar.so
       - name: Test
         run: python3 -m unittest discover -s tests -v
+
+  patches:
+    name: patches apply to Agave
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch Agave at the tag
+        run: git clone --depth 1 --branch "$AGAVE_TAG" https://github.com/anza-xyz/agave agave
+      - name: Test the patch stack
+        run: bash chain/patches/apply.sh agave
