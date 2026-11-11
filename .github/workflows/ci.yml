@@ -43,3 +43,38 @@ jobs:
         run: git clone --depth 1 --branch "$AGAVE_TAG" https://github.com/anza-xyz/agave agave
       - name: Test the patch stack
         run: bash chain/patches/apply.sh agave
+
+  vm:
+    name: both programs in the prototype VM
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - name: Install dependencies
+        run: python3 -m pip install -r requirements.txt
+      - name: Check for AVX-512
+        id: cpu
+        run: |
+          if grep -q avx512f /proc/cpuinfo; then echo "avx512=true" >> "$GITHUB_OUTPUT"; else echo "avx512=false" >> "$GITHUB_OUTPUT"; echo "This runner has no AVX-512; the prototype VM cannot run vector programs here."; fi
+      - name: Fetch the prototype VM
+        if: steps.cpu.outputs.avx512 == 'true'
+        run: |
+          git clone "https://$SBPF_REPO" sbpf
+          git -C sbpf checkout "$SBPF_REV"
+      - name: Build the prototype VM crate
+        if: steps.cpu.outputs.avx512 == 'true'
+        run: cd sbpf && cargo build --release
+      - name: Build the VM harness
+        if: steps.cpu.outputs.avx512 == 'true'
+        run: bash chain/minds/vm/build.sh sbpf sbpf
+      - name: Build the digit mind programs
+        if: steps.cpu.outputs.avx512 == 'true'
+        run: |
+          mkdir -p out
+          python3 chain/minds/gen_mind.py elf-vector chain/minds/digit/weights.bin out/digit-vector.so
+          python3 chain/minds/gen_mind.py elf-scalar chain/minds/digit/weights.bin out/digit-scalar.so
+      - name: Test against the reference
+        if: steps.cpu.outputs.avx512 == 'true'
+        run: python3 chain/minds/vm/check.py sbpf out/digit-vector.so out/digit-scalar.so chain/minds/fixtures/inputs.bin --weights chain/minds/digit/weights.bin
