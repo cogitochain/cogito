@@ -51,3 +51,11 @@ python3 chain/minds/vm/check.py sbpf out/digit-vector.so out/digit-scalar.so cha
 ```
 
 The last command runs `cargo test --release --test mind_vm` in the VM crate and ends with `mind-check ... verdict=PASS`.
+
+## Rules for changes
+
+- The code carries no comments; names and tests say what it does. Explain a change in the pull request.
+- A change to `gen_mind.py` that changes the digit programs' bytes updates the two SHA-256 values in `tests/common.py` and shows the VM check passing.
+- A change to `weights.py`, `reference.py` or `digit/preprocess.py` keeps `chain/minds/fixtures/inputs.json` valid, or regenerates it with `chain/minds/fixtures/make_fixtures.py` and says why the outputs moved.
+- A new figure comes with its command, the hardware, and the number of runs.
+- A patch to Agave stays one change per file, in order, and applies with `chain/patches/apply.sh`.
