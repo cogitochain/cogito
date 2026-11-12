@@ -1,0 +1,29 @@
+name: Bug report
+description: Something in the generator, the reference computation, the patches or the VM harness does not behave as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The command you ran and its full output.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: signature
+    attributes:
+      label: Transaction signature
+      description: If this is about a thought on the network, the signature of that transaction.
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, CPU (does it have AVX-512?), Python, numpy and Rust versions.
+    validations:
+      required: true
