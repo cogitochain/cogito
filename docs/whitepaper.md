@@ -48,3 +48,15 @@ Host for every row: AMD Ryzen 9 9950X (AVX-512), 28 cores. Chain rows: our netwo
 The SIMD-0714 document reports, for an Int8 MLP 256→128→16, 490,048 CU scalar against 2,109 CU vector (232x) and 361 µs against 1.17 µs under the JIT (308x), measured on an AMD EPYC 9534. That is another machine and other kernels; it is shown beside ours, not as the same conditions. Our ratios are of the same order: 206x to 228x in CU and 239x to 263x in JIT time.
 
 CU is the prototype's price list, not time. Under the JIT, the digit mind's vector program and its scalar twin both take about 0.57 ns per CU of their own instructions, so on this host the 1-CU price of a vector instruction is consistent with what it costs to run. Under the interpreter it is not: there the gain falls to about 11x.
+
+## How to reproduce
+
+Every figure is a `rig.py` record: the command below is run several times and its last line is the figure. From the source tree:
+
+- Chain CU: `MINDS_RPC=<RPC URL> python3 rig.py run --name mind-digit-vector-program-cu --runs 3 -- python3 chain/minds/measure_one.py think digit-vector program` (the same with `digit-scalar`, `trial-vector`, `trial-scalar`, and `program` or `tx`; `measure_one.py transfer` for the transfer).
+- Wall time: `python3 rig.py run --name mind-digit-vector-jit-us --runs 5 -- bash chain/minds/vm/bench.sh <sbpf work dir> chain/minds/build/digit-vector.so chain/minds/fixtures/inputs.bin jit` (`interp` for the interpreter; `chain/minds/vm/build.sh` prepares the prototype crate with the harness).
+- Accuracy: `python3 rig.py run --name mind-digit-accuracy --runs 3 -- python3 chain/minds/digit/accuracy.py chain/minds/data chain/minds/digit/weights.bin` (`chain/minds/fetch_mnist.sh` fetches MNIST and checks its SHA-256 sums).
+- The programs: `python3 chain/minds/gen_mind.py elf-vector chain/minds/digit/weights.bin digit-vector.so` and `elf-scalar` for the twin; `python3 chain/minds/reference.py <weights> <input>` prints the outputs and the exact `Program data:` line the chain must log.
+- With the stock CLI, against our public RPC: `solana confirm -v <signature> --url <our RPC>` prints the mind's log lines, the `consumed N of M compute units` line and `Compute Units Consumed`. Only the URL differs from a mainnet query. With web3.js: `getTransaction(signature, { maxSupportedTransactionVersion: 0 })`, `meta.logMessages` and `meta.computeUnitsConsumed`.
+- Network rows: `rig.py run --name net-slot-pace --runs 10 -- bash chain/ops/measure/slot-pace.sh <RPC URL> 10` reads the slot twice 10 s apart through the gateway; `net-confirm-<location>` runs `node chain/ops/measure/confirm.cjs <RPC URL> <payer>` from a client inside that location, timing a transfer from send to confirmed by polling its status over HTTP. `net-load-sustained` runs `bash chain/ops/load/ladder.sh <project> sustained`, the load ladder whose levels and failures are written out on the status page.
+- The node: Agave at tag v4.5.0-alpha.4 with our six patch files applied, building the validator and the fork's own `solana` CLI (needed only to deploy SBPF v3 programs).
