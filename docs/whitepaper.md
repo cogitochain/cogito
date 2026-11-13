@@ -70,3 +70,16 @@ Every figure is a `rig.py` record: the command below is run several times and it
 - MNIST handwritten digits (LeCun, Cortes, Burges), training and test sets.
 - Solana fees and the per-transaction compute limit of 1,400,000 CU: solana.com/docs/core/fees.
 - Another road, for contrast: proving inference that ran elsewhere, as zkLLM (arXiv 2404.16109), opML (arXiv 2401.17555) and TOPLOC (arXiv 2501.16007) do. They make a model's answer checkable without running it on chain; COGITO runs the network on chain, which only works for networks this small.
+
+## What does not work yet
+
+- Every validator needs AVX-512. The prototype's loader refuses to start without it, so this network cannot accept validators on other hardware.
+- The prototype's CU prices hold under the JIT on this host. In the interpreter a vector operation costs far more time per CU than an ordinary instruction.
+- Minds are small: one fixed shape, 256 inputs, 128 hidden units, 16 outputs, Int8, no biases. The widest that fits one transaction is about 5.4 million multiply-adds, and it is bounded by program size; a deeper network or a language model does not fit. The SIMD-0714 proposal is a draft with open objections; it may change or never be adopted.
+- No compiler emits the vector instructions: minds are written by our generator, not built from Rust.
+- The stock Solana CLI 3.0 reads everything on this network but cannot deploy an SBPF v3 program to it; deploys use the fork's own CLI on our side.
+- Public load is bounded by our one RPC gateway: it held 1,200 simulated visitors and ran out of memory at 2,400, before the validators showed any limit. The load came from the same server, not from the internet.
+- Transaction history is short. To keep the network inside a fixed disk budget, every validator keeps only its newest ledger: the main RPC node 4,955,731 shreds, the other three 1,321,528 each. At about 96 shreds per quiet slot and 3.4 slots a second that is about 4 hours of transactions on the main RPC node and about 1 hour on the second RPC node, which answers while the main one restarts. This is computed from those limits, not yet measured over a full cycle, and busier slots shorten it. An older signature answers "not found".
+- The network survives one quiet validator of four (three of four hold 75 % of the stake); two quiet validators stop it.
+- All validators are ours and run on one server, so the network has no independent validators. A wallet's gas here is test gas from a faucet, with no value. $COGITO, the token, lives on Solana mainnet and is not this chain's gas today.
+- The digit mind reads drawings less reliably than MNIST digits, because a drawing is not written the way MNIST's digits were. The 98.01 % figure is for the MNIST test set only.
