@@ -18,3 +18,34 @@ No key can change a mind once it is on the network. Every mind is deployed final
 4. **Deploy.** Both programs are deployed final with the fork's own CLI, the only one that can deploy SBPF v3 today. Neither has an upgrade authority.
 5. **Think.** A thought is one transaction to a mind with the 256 input bytes as instruction data and no accounts. The program computes h = clamp(relu(W1 x) >> 8, 0, 255) and y = W2 h and logs y as sixteen little-endian i32 values with one `sol_log_data` call.
 6. **Check.** `reference.py` recomputes y off chain from the same weights and prints the `Program data:` line the chain must log; the stock Solana CLI shows the real one with `solana confirm -v <signature>` against the network's RPC.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Repo["This repository"]
+    W["weights.bin<br/>COGMIND1, W1, W2"]
+    G["gen_mind.py"]
+    R["reference.py"]
+    P["chain/patches/0001-0006"]
+  end
+  subgraph Net["COGITO network (operated by us)"]
+    A["Agave v4.5.0-alpha.4<br/>+ prototype VM"]
+    V["6 validators, 3 locations<br/>AVX-512 on every one"]
+    GW["RPC gateway<br/>per-address limits"]
+    F["Faucet<br/>test gas"]
+  end
+  subgraph Users["Anyone"]
+    B["Browser<br/>throwaway key"]
+    CLI["Stock Solana CLI"]
+  end
+  P --> A --> V
+  W --> G -->|vector + scalar ELF| V
+  W --> R
+  B -->|thought| GW --> V
+  F --> B
+  CLI -->|solana confirm -v| GW
+  R -.->|expected Program data line| CLI
+```
+
+The patches turn upstream Agave into the node every validator runs; the generator turns a weights file into the two programs those validators execute. The reference computation never touches the network: it predicts, byte for byte, what the network will log, so anyone can compare a real transaction's log with it.
