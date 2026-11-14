@@ -49,3 +49,26 @@ flowchart LR
 ```
 
 The patches turn upstream Agave into the node every validator runs; the generator turns a weights file into the two programs those validators execute. The reference computation never touches the network: it predicts, byte for byte, what the network will log, so anyone can compare a real transaction's log with it.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as Browser or CLI
+  participant G as RPC gateway
+  participant V as Validator
+  participant M as Mind program
+  U->>G: sendTransaction(mind id, 256 input bytes, no accounts)
+  G->>V: forward within per-address limits
+  V->>M: execute in the prototype VM
+  alt no accounts and exactly 256 bytes
+    M->>M: layer 1 with dpbusd, requantize, layer 2
+    M->>V: sol_log_data(16 x i32)
+    V-->>U: Program data: <base64>, compute units consumed
+  else an account or another length
+    M-->>V: exit with error 1 (account) or 2 (length)
+    V-->>U: transaction failed, nothing logged
+  end
+  U->>U: compare with reference.py output
+```
+
+One thought is one instruction. A thought with an account or with any length other than 256 bytes ends with a custom error before a single weight is read; the tests run both refusals on the scalar twin.
