@@ -99,3 +99,13 @@ flowchart LR
 ```
 
 Each patch is one change to one file, in order, applied with `git apply` by `chain/patches/apply.sh`. Nothing else in Agave changes; the node's fee schedule, consensus and runtime are upstream's, and the vector instructions are priced by the prototype's own CU schedule.
+
+### Programs and accounts
+
+A mind has no state account. Everything it needs is in its own program: the code in the text segment, the weights and the vector descriptors in read-only data.
+
+| Account | Seeds | Holds |
+|---|---|---|
+| Mind program, vector | none (deployed final) | the vector code, 59 descriptors (944 bytes) and 34,816 weight bytes |
+| Mind program, scalar twin | none (deployed final) | the scalar loops and the same 34,816 weight bytes |
+| Fee payer of a thought | none | test gas from the faucet; the browser uses a throwaway key |
