@@ -72,3 +72,30 @@ sequenceDiagram
 ```
 
 One thought is one instruction. A thought with an account or with any length other than 256 bytes ends with a custom error before a single weight is read; the tests run both refusals on the scalar twin.
+
+```mermaid
+flowchart TD
+  WB["weights.bin"] --> VAL{"weights.validate"}
+  VAL -->|BAD_SIZE, BAD_FORMAT, ZERO_WEIGHTS| REF["refused"]
+  VAL -->|W1 128x256, W2 16x128| BV["build_vector<br/>descriptors + weights in rodata<br/>1,227 vector ops"]
+  VAL --> BS["build_scalar<br/>weights in rodata<br/>73 instructions, loops"]
+  BV --> ELF["elf(): two PT_LOAD segments<br/>rodata at 0x0, text at 0x100000000"]
+  BS --> ELF
+  ELF --> SO1["digit-vector.so<br/>68,664 bytes"]
+  ELF --> SO2["digit-scalar.so<br/>35,576 bytes"]
+```
+
+The generator is deterministic: the same weights give the same bytes. The digit mind's programs built from this repository have the same SHA-256 as the programs deployed on the network, and a test holds them to it.
+
+```mermaid
+flowchart LR
+  T["anza-xyz/agave<br/>tag v4.5.0-alpha.4"] --> P1["0001<br/>solana-sbpf from the<br/>prototype commit"]
+  P1 --> P2["0002<br/>syscalls: follow the<br/>prototype's API"]
+  P2 --> P3["0003<br/>mock bank: same<br/>API change"]
+  P3 --> P4["0004<br/>vector ops on,<br/>aligned memory mapping on"]
+  P4 --> P5["0005<br/>deploy: do not register<br/>sol_avx512 twice"]
+  P5 --> P6["0006<br/>ledger: smallest kept ledger<br/>100,000 shreds"]
+  P6 --> N["COGITO validator"]
+```
+
+Each patch is one change to one file, in order, applied with `git apply` by `chain/patches/apply.sh`. Nothing else in Agave changes; the node's fee schedule, consensus and runtime are upstream's, and the vector instructions are priced by the prototype's own CU schedule.
