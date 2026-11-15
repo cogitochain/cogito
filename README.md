@@ -109,3 +109,48 @@ A mind has no state account. Everything it needs is in its own program: the code
 | Mind program, vector | none (deployed final) | the vector code, 59 descriptors (944 bytes) and 34,816 weight bytes |
 | Mind program, scalar twin | none (deployed final) | the scalar loops and the same 34,816 weight bytes |
 | Fee payer of a thought | none | test gas from the faucet; the browser uses a throwaway key |
+
+## Repository structure
+
+```
+.
+├── chain
+│   ├── patches
+│   │   ├── 0001-sbpf-prototype.patch               solana-sbpf from the prototype commit
+│   │   ├── 0002-api-drift-syscalls.patch           aligned_region_size replaces a removed flag
+│   │   ├── 0003-api-drift-mock-bank.patch          the same change in the SVM test bank
+│   │   ├── 0004-vector-ops-aligned-mapping.patch   vector ops and the aligned mapping they need
+│   │   ├── 0005-deploy-skip-duplicate-avx512.patch the deploy environment registers sol_avx512 once
+│   │   ├── 0006-ledger-floor.patch                 smallest kept ledger 50,000,000 -> 100,000 shreds
+│   │   └── apply.sh                                applies the stack in order
+│   └── minds
+│       ├── weights.py           the COGMIND1 format: validate, pack, hash, seeded random weights
+│       ├── reference.py         the exact integer forward pass and the Program data line
+│       ├── gen_mind.py          SBPF v3 assembler, vector and scalar code generation, ELF writer
+│       ├── fetch_mnist.sh       MNIST download checked against its SHA-256 sums
+│       ├── digit
+│       │   ├── train.py         training with the programs' arithmetic in the forward pass
+│       │   ├── preprocess.py    ink image to the 256 input bytes
+│       │   ├── accuracy.py      accuracy on the 10,000 held-out MNIST digits
+│       │   ├── weights.bin      the digit mind
+│       │   ├── train-log.json   seed, schedule, loss per epoch, weights hash
+│       │   └── op-counts.json   static op counts of both programs
+│       ├── fixtures
+│       │   ├── inputs.json      12 inputs with their outputs, answers and log lines
+│       │   ├── inputs.bin       the same inputs, 256 bytes each
+│       │   └── make_fixtures.py how they were made
+│       ├── tools
+│       │   ├── pack_weights.py  JSON matrices to a weights file
+│       │   └── op_counts.py     counts what the generator emits
+│       └── vm
+│           ├── mind_vm.rs       harness run inside the prototype VM crate
+│           ├── build.sh         places and builds the harness
+│           ├── check.py         both programs, JIT and interpreter, against the reference
+│           └── bench.sh         p50 wall time of one program
+├── docs/whitepaper.md           the whitepaper source, with every measured figure
+└── tests                        unittest suites and a small SBPF interpreter for the scalar twin
+```
+
+`gen_mind.py` is the heart of the repository. Today's compilers emit neither the vector instructions nor the prototype's SBPF v3 layout, so it assembles every instruction itself: a vector operation is a 16-byte descriptor in read-only data (operation, immediate, output and input registers, offset) loaded with `lddw r1` and executed by `call sol_avx512`. Layer 1 runs as `ldbc.d` (broadcast four input bytes), `ld` (64 bytes of weights) and `dpbusd` (64 multiply-adds), sixteen hidden units at a time.
+
+`reference.py` is the other half: the same arithmetic in Python, used by the tests, by the VM check and by anyone comparing a transaction log. `tests/sbpf.py` executes the scalar twin instruction by instruction; it counts 349,694 instructions for the first fixture, and the network charges that thought 349,958 CU, the difference being the 264 CU of the logging call.
