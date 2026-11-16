@@ -235,3 +235,11 @@ Properties the programs enforce, checked by the tests (the scalar twin runs in `
 - A thought with any account is refused with error 1, and one whose data is not exactly 256 bytes with error 2, before any weight is read.
 - A program reads only its own read-only data, its input and a fixed heap area, and writes only that heap area; it logs exactly 64 bytes.
 - The output is a pure function of the weights and the input: the reference computation reproduces every logged value.
+
+### Trust assumptions
+
+- **Upgrade authority.** Every mind is deployed final: immutable, with no upgrade authority, so no key can change its code or its weights.
+- **Admin.** We operate every validator, the RPC gateway and the faucet. As the admin of the network we can stop it, reset it, change the per-address limits or move to another build at any time and without notice; there are no independent validators. What we cannot do is change a deployed mind or make it log anything other than what the reference predicts.
+- **What no key can move.** A mind accepts no accounts, so a thought cannot move or take anything. The site never asks for a Solana mainnet signature, and nothing in this repository can transfer $COGITO.
+- **Dependencies.** The network depends on Agave `v4.5.0-alpha.4`, on the SIMD-0714 prototype VM at `585f893` as it is, and on AVX-512 in every validator. The prototype's CU prices are its own; a draft proposal may change or never be adopted. The tools here depend on numpy and Pillow at the pinned versions and on the public MNIST files.
+- **Audit.** Neither the patches, the generator nor the prototype VM has been audited. The tests and the VM check are evidence that the programs compute what the reference says; they are not an audit.
