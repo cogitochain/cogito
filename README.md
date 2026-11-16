@@ -243,3 +243,7 @@ Properties the programs enforce, checked by the tests (the scalar twin runs in `
 - **What no key can move.** A mind accepts no accounts, so a thought cannot move or take anything. The site never asks for a Solana mainnet signature, and nothing in this repository can transfer $COGITO.
 - **Dependencies.** The network depends on Agave `v4.5.0-alpha.4`, on the SIMD-0714 prototype VM at `585f893` as it is, and on AVX-512 in every validator. The prototype's CU prices are its own; a draft proposal may change or never be adopted. The tools here depend on numpy and Pillow at the pinned versions and on the public MNIST files.
 - **Audit.** Neither the patches, the generator nor the prototype VM has been audited. The tests and the VM check are evidence that the programs compute what the reference says; they are not an audit.
+
+## License
+
+[MIT](LICENSE).
