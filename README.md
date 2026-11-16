@@ -1,4 +1,15 @@
+<p align="center"><img src="assets/banner.png" alt="COGITO" width="100%"></p>
+
 # COGITO
+
+<p align="center">
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" alt="License: MIT"></a>
+<a href="docs/whitepaper.md"><img src="https://img.shields.io/badge/chain-Agave%20v4.5.0--alpha.4%20fork-black" alt="Chain: Agave fork"></a>
+<a href="https://www.python.org/downloads/release/python-3123/"><img src="https://img.shields.io/badge/python-3.12.3-black" alt="Python 3.12.3"></a>
+<a href="https://github.com/cogitochain/cogito/actions/workflows/ci.yml"><img src="https://github.com/cogitochain/cogito/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+<a href="https://cogito.run"><img src="https://img.shields.io/badge/website-cogito.run-black" alt="Website"></a>
+<a href="https://x.com/cogitochain"><img src="https://img.shields.io/badge/x-%40cogitochain-black" alt="X"></a>
+</p>
 
 Website [https://cogito.run](https://cogito.run) · X [https://x.com/cogitochain](https://x.com/cogitochain) · GitHub [cogitochain/cogito](https://github.com/cogitochain/cogito) · Whitepaper [docs/whitepaper.md](docs/whitepaper.md)
 
