@@ -211,3 +211,17 @@ Reproduce the accuracy figure (downloads MNIST, about 11 MB, and checks its SHA-
 bash chain/minds/fetch_mnist.sh
 python3 chain/minds/digit/accuracy.py chain/minds/data chain/minds/digit/weights.bin
 ```
+
+### Measured
+
+From the whitepaper's measured rows. Host: AMD Ryzen 9 9950X (AVX-512). Chain rows: our network of 6 validators in 3 emulated locations. Wall-time rows: the prototype VM with the network's loader configuration.
+
+| Figure | Vector program | Scalar twin |
+|---|---|---|
+| Digit mind, program CU | 1,700 CU | 349,958 CU (206x) |
+| Digit mind, JIT wall time | 0.822 µs | 196.6 µs (239x) |
+| Digit mind, interpreter wall time | 66.6 µs | 724.1 µs (about 11x) |
+| Widest mind 256 -> H -> 16 in one transaction | 19,920 hidden units, 221,032 CU | 512 hidden units, 1,398,524 CU |
+| Digit mind accuracy, 10,000 held-out MNIST digits | 98.01 % | 98.01 % |
+
+For comparison, a plain System Program transfer on the same network costs 150 CU. The vector mind's width is bounded by the 10 MiB program account, not by compute; the scalar twin's by the 1,400,000 CU transaction limit.
