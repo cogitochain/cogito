@@ -154,3 +154,60 @@ A mind has no state account. Everything it needs is in its own program: the code
 `gen_mind.py` is the heart of the repository. Today's compilers emit neither the vector instructions nor the prototype's SBPF v3 layout, so it assembles every instruction itself: a vector operation is a 16-byte descriptor in read-only data (operation, immediate, output and input registers, offset) loaded with `lddw r1` and executed by `call sol_avx512`. Layer 1 runs as `ldbc.d` (broadcast four input bytes), `ld` (64 bytes of weights) and `dpbusd` (64 multiply-adds), sixteen hidden units at a time.
 
 `reference.py` is the other half: the same arithmetic in Python, used by the tests, by the VM check and by anyone comparing a transaction log. `tests/sbpf.py` executes the scalar twin instruction by instruction; it counts 349,694 instructions for the first fixture, and the network charges that thought 349,958 CU, the difference being the 264 CU of the logging call.
+
+## Quick start
+
+Requirements: Python 3.12.3 with numpy 2.5.4 and Pillow 13.0.0 (`requirements.txt`), git 2.43 or newer. For the VM check: Rust (the prototype crate selects stable; rustc 1.100.0 in our runs) and an x86-64 CPU with AVX-512.
+
+```
+python3 -m pip install -r requirements.txt
+mkdir -p out
+python3 chain/minds/gen_mind.py elf-vector chain/minds/digit/weights.bin out/digit-vector.so
+python3 chain/minds/gen_mind.py elf-scalar chain/minds/digit/weights.bin out/digit-scalar.so
+python3 -m unittest discover -s tests -v
+```
+
+The patch stack against Agave at the tag:
+
+```
+git clone --depth 1 --branch v4.5.0-alpha.4 https://github.com/anza-xyz/agave agave
+bash chain/patches/apply.sh agave
+```
+
+Both programs in the prototype VM, JIT and interpreter, on the twelve fixtures (`sbpf` is a checkout of temporalxyz/sbpf at `585f8935f10863b31ce5fc5676aa16879a8eb1ee`):
+
+```
+cd sbpf && cargo build --release && cd ..
+bash chain/minds/vm/build.sh sbpf sbpf
+python3 chain/minds/vm/check.py sbpf out/digit-vector.so out/digit-scalar.so chain/minds/fixtures/inputs.bin --weights chain/minds/digit/weights.bin
+```
+
+
+Predict a thought's log line and compare it with a real transaction:
+
+```
+head -c 256 chain/minds/fixtures/inputs.bin > out/first-input.bin
+python3 chain/minds/reference.py chain/minds/digit/weights.bin out/first-input.bin
+solana confirm -v <signature> --url <the network's RPC URL, published on https://cogito.run>
+```
+
+Use the reference from Python:
+
+```python
+import sys
+sys.path.insert(0, "chain/minds")
+from weights import load_weights
+from reference import forward, log_data
+
+w1, w2 = load_weights("chain/minds/digit/weights.bin")
+x = list(open("chain/minds/fixtures/inputs.bin", "rb").read()[:256])
+h, y = forward(w1, w2, x)
+print(max(range(10), key=lambda k: (y[k], -k)), "Program data: " + log_data(y))
+```
+
+Reproduce the accuracy figure (downloads MNIST, about 11 MB, and checks its SHA-256 sums):
+
+```
+bash chain/minds/fetch_mnist.sh
+python3 chain/minds/digit/accuracy.py chain/minds/data chain/minds/digit/weights.bin
+```
