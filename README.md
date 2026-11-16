@@ -225,3 +225,13 @@ From the whitepaper's measured rows. Host: AMD Ryzen 9 9950X (AVX-512). Chain ro
 | Digit mind accuracy, 10,000 held-out MNIST digits | 98.01 % | 98.01 % |
 
 For comparison, a plain System Program transfer on the same network costs 150 CU. The vector mind's width is bounded by the 10 MiB program account, not by compute; the scalar twin's by the 1,400,000 CU transaction limit.
+
+## Security
+
+Report vulnerabilities as described in [SECURITY.md](SECURITY.md).
+
+Properties the programs enforce, checked by the tests (the scalar twin runs in `tests/sbpf.py` with only its read-only data, a heap and its input mapped) and by the VM check:
+
+- A thought with any account is refused with error 1, and one whose data is not exactly 256 bytes with error 2, before any weight is read.
+- A program reads only its own read-only data, its input and a fixed heap area, and writes only that heap area; it logs exactly 64 bytes.
+- The output is a pure function of the weights and the input: the reference computation reproduces every logged value.
