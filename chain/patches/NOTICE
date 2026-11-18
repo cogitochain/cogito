@@ -1,0 +1,5 @@
+The patch files in this directory are diffs against Agave (https://github.com/anza-xyz/agave), tag v4.5.0-alpha.4, commit ccddd3dffc7edb1d6ed8182ac8e9cbd73b24b159.
+
+Agave is licensed under the Apache License, Version 2.0 (https://www.apache.org/licenses/LICENSE-2.0). The lines of Agave's source that these diffs carry as context, and the files they change, remain under that licence.
+
+The changes themselves were written for COGITO and are offered under the same Apache License, Version 2.0, so that a patched Agave tree stays under one licence.
