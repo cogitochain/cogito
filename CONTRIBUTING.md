@@ -15,7 +15,7 @@ Changes are welcome where they keep three things true: the generator emits the s
 
 ## The commands CI runs
 
-Lint:
+Byte-compile every source file (a syntax check, not a linter):
 
 ```
 python3 -m compileall -q chain tests

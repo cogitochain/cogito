@@ -9,5 +9,5 @@ if [ ! -d "$work/src" ]; then
 fi
 cp "$here/mind_vm.rs" "$work/tests/mind_vm.rs"
 cd "$work"
-nice -n 10 cargo test --release --test mind_vm --no-run -j 8
+cargo test --release --test mind_vm --no-run
 echo "mind-vm-build verdict=PASS"
