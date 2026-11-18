@@ -151,5 +151,23 @@ class ScalarProgramExecution(unittest.TestCase):
         self.assertEqual(list(struct.unpack("<16i", logged[0])), want)
 
 
+class VectorProgramRefusals(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.vector = build("vector", *load_weights(WEIGHTS))
+
+    def think(self, x, accounts=0):
+        return sbpf.run(self.vector, x, accounts=accounts, logdata_hash=gen_mind.LOGDATA)
+
+    def test_wrong_length_refused(self):
+        for n in (0, 255, 257):
+            rc, logged, _ = self.think(bytes(n))
+            self.assertEqual((rc, logged), (2, []), n)
+
+    def test_account_refused(self):
+        rc, logged, _ = self.think(bytes(256), accounts=1)
+        self.assertEqual((rc, logged), (1, []))
+
+
 if __name__ == "__main__":
     unittest.main()
