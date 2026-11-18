@@ -11,9 +11,9 @@ The patch stack is maintained against one Agave tag, `v4.5.0-alpha.4`, and one p
 
 ## Reporting a vulnerability
 
-Report privately through GitHub Security Advisories on this repository (Security, then "Report a vulnerability"). Do not open a public issue for a vulnerability.
+Report privately through GitHub Security Advisories on this repository (Security, then "Report a vulnerability"). If that form is not available, send a direct message to [@cogitochain on X](https://x.com/cogitochain) asking for a private channel, with no details of the issue in that message. Do not open a public issue for a vulnerability.
 
-Include what you ran, what happened, and, when it concerns the running network, the transaction signature. We acknowledge a report within three days and tell you what we will do about it within ten.
+Include what you ran, what happened, and, when it concerns the running network, the transaction signature with its slot and the time in UTC. The node keeps only a few hours of transactions, so the slot and time let us find the site's own record of it after the signature has been pruned. We acknowledge a report within three days and tell you what we will do about it within ten.
 
 ## Scope
 

@@ -18,8 +18,8 @@ body:
   - type: input
     id: signature
     attributes:
-      label: Transaction signature
-      description: If this is about a thought on the network, the signature of that transaction.
+      label: Transaction signature, slot and time
+      description: If this is about a thought on the network, its signature, its slot and the time in UTC. The node keeps only a few hours of transactions; with the slot and time we find the site's own record of it.
   - type: input
     id: env
     attributes:
