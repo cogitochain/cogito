@@ -45,7 +45,7 @@ flowchart LR
   end
   subgraph Net["COGITO network (operated by us)"]
     A["Agave v4.5.0-alpha.4<br/>+ prototype VM"]
-    V["6 validators, 3 locations<br/>AVX-512 on every one"]
+    V["Validators in 3 locations<br/>AVX-512 on every one"]
     GW["RPC gateway<br/>per-address limits"]
     F["Faucet<br/>test gas"]
   end
@@ -229,7 +229,7 @@ python3 chain/minds/digit/accuracy.py chain/minds/data chain/minds/digit/weights
 
 ### Measured
 
-From the whitepaper's measured rows. Host: AMD Ryzen 9 9950X (AVX-512). Chain rows: our network of 6 validators in 3 emulated locations. Wall-time rows: the prototype VM with the network's loader configuration.
+From the whitepaper's measured rows. Host: AMD Ryzen 9 9950X (AVX-512). Chain rows: the four-validator benchmark network in 3 emulated locations. Wall-time rows: the prototype VM with the network's loader configuration.
 
 | Figure | Vector program | Scalar twin |
 |---|---|---|

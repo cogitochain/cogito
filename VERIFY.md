@@ -23,3 +23,7 @@ total: passed=89 failed=0
 parity: original_passed=89 github_passed=89
 mermaid: rendered=4/4
 <!-- /verify -->
+
+## Source history
+
+The commits leading up to the public import reconstruct the supplied source snapshot in dependency order. Their dates illustrate that sequence. The original development timestamps were unavailable. The verification record above retains its recorded run time.
