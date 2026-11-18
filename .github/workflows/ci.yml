@@ -18,7 +18,7 @@ jobs:
     name: build and test the minds
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version
@@ -38,7 +38,7 @@ jobs:
     name: patches apply to Agave
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Fetch Agave at the tag
         run: git clone --depth 1 --branch "$AGAVE_TAG" https://github.com/anza-xyz/agave agave
       - name: Test the patch stack
@@ -48,7 +48,7 @@ jobs:
     name: both programs in the prototype VM
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version
