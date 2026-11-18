@@ -34,5 +34,5 @@
   "instruction_slots_static": 73,
   "inner_loop_instructions_per_multiply_add": 10
  },
- "note": "static counts from chain/minds/gen_mind.py; executed counts (CU) are in the rig records"
+ "note": "static counts from chain/minds/gen_mind.py; executed counts (CU) are in docs/whitepaper.md, Measured"
 }

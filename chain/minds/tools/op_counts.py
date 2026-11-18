@@ -33,6 +33,6 @@ out = {
                "dpbusd_multiply_adds_each": 64},
     "scalar": {"instruction_slots_static": len(scode) // 8,
                "inner_loop_instructions_per_multiply_add": 10},
-    "note": "static counts from chain/minds/gen_mind.py; executed counts (CU) are in the rig records",
+    "note": "static counts from chain/minds/gen_mind.py; executed counts (CU) are in docs/whitepaper.md, Measured",
 }
 print(json.dumps(out, indent=1))
